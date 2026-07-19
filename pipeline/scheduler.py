@@ -45,7 +45,7 @@ def main():
     refresh_job()
 
     logger.info("Starting scheduler: refreshing every %d hours", REFRESH_HOURS)
-    scheduler.start()  # blocks forever; Ctrl+C to stop
+    scheduler.start()
 
 
 if __name__ == "__main__":
