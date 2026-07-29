@@ -17,6 +17,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Query
 
 from db.connection import get_connection
+from pipeline.run import run_pipeline
 from recommender.content_based import get_similar_videos, _get_model
 from api.models.schemas import Video, Recommendation, RefreshResult
 
@@ -57,6 +58,19 @@ def recommend(video_id: str, limit: int = Query(default=10, ge=1, le=50)):
             status_code=404,
             detail=f"Video {video_id!r} not found in corpus",
         )
+
+
+@router.post("/ingest")
+def ingest():
+    """
+    Run one full ingestion pass: fetch trending, clean, index.
+
+    This is the cloud replacement for the local BlockingScheduler. Cloud Run
+    is request-driven and can't host an always-on background loop, so in
+    production a Cloud Scheduler job POSTs here every 6 hours instead.
+    """
+    count = run_pipeline()
+    return {"indexed": count}
 
 
 @router.post("/refresh", response_model=RefreshResult)
