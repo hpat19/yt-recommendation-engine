@@ -34,5 +34,7 @@ def run_pipeline(max_results: int = 50) -> int:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    from logging_config import configure_logging
+
+    configure_logging()
     run_pipeline()

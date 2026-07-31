@@ -13,12 +13,10 @@ import logging
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 
+from logging_config import configure_logging
 from pipeline.run import run_pipeline
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-)
+configure_logging()
 logger = logging.getLogger(__name__)
 
 REFRESH_HOURS = 6 

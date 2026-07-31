@@ -10,6 +10,9 @@ run locally with:
 from fastapi import FastAPI
 
 from api.routes.videos import router
+from logging_config import configure_logging
+
+configure_logging()
 
 app = FastAPI(
     title="YouTube Recommendation Engine",

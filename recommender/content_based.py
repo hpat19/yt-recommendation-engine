@@ -135,7 +135,9 @@ def get_similar_videos(video_id: str, limit: int = 10) -> list[dict]:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    from logging_config import configure_logging
+
+    configure_logging()
 
     model = _get_model()
     sample_id = model["ids"][0]
