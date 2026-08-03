@@ -13,8 +13,9 @@ only touches in-process state (the cached TF-IDF model), not the database.
 """
 
 import logging
+import os
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Header, HTTPException, Query
 
 from db.connection import get_connection
 from pipeline.run import run_pipeline
@@ -60,15 +61,22 @@ def recommend(video_id: str, limit: int = Query(default=10, ge=1, le=50)):
         )
 
 
+INGEST_SECRET = os.getenv("INGEST_SECRET")
+
+
 @router.post("/ingest")
-def ingest():
+def ingest(x_ingest_secret: str | None = Header(default=None)):
     """
     Run one full ingestion pass: fetch trending, clean, index.
 
-    This is the cloud replacement for the local BlockingScheduler. Cloud Run
-    is request-driven and can't host an always-on background loop, so in
-    production a Cloud Scheduler job POSTs here every 6 hours instead.
+    Protected by a shared secret, since this endpoint triggers external API
+    calls and database writes. Cloud Scheduler sends the secret in the
+    X-Ingest-Secret header; the read endpoints stay public so the API
+    remains browsable.
     """
+    if not INGEST_SECRET or x_ingest_secret != INGEST_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     count = run_pipeline()
     return {"indexed": count}
 
